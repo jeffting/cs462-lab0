@@ -22,8 +22,8 @@ A first ruleset for the Quickstart
   }
   
   rule hello_monkey {
-    select when echo hello_monkey
-    send_directive("say", {"something": "Hello World"})
+    select when echo monkey
+    send_directive("say", {"something": "Hello Monkey"})
   }
    
 }
