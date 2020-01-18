@@ -26,10 +26,18 @@ A first ruleset for the Quickstart
   //   send_directive("say", {"something": "Hello World"})
   // }
   
+  // rule hello_monkey {
+  //   select when echo monkey
+  //   pre {
+  //     name = event:attr("name").defaultsTo("Monkey").klog("our passed in name: ")
+  //   }
+  //   send_directive("say", {"something": "Hello " + name})
+  // }
+
   rule hello_monkey {
     select when echo monkey
     pre {
-      name = event:attr("name").defaultsTo("Monkey").klog("our passed in name: ")
+      name = event:attr("name") => event:attr("name") | "Monkey"
     }
     send_directive("say", {"something": "Hello " + name})
   }
