@@ -16,9 +16,12 @@ ruleset io.picolabs.use_twilio_v2 {
 
     rule test_messages {
       select when test messages
-      twilio:messages(event:attr("to"),
-                      event:attr("from"),
-                      event:attr("pages")
-                     )
+      pre {
+        test = twilio:messages(event:attr("to"),
+        event:attr("from"),
+        event:attr("pages")
+       )
+      }
+      send_directive("say", {"stuff": test})
     }
   }
