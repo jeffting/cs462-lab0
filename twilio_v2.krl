@@ -21,7 +21,7 @@ ruleset io.picolabs.twilio_v2 {
         base_url = <<https://#{account_sid}:#{auth_token}@api.twilio.com/2010-04-01/Accounts/#{account_sid}/>>
         http:get(base_url + "Messages", from = {
           "From":+16235525839,
-          "To": 2082018898,
+          "To": 2082018898
         })
       }
     }
