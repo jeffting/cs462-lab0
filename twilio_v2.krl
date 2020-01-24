@@ -17,7 +17,7 @@ ruleset io.picolabs.twilio_v2 {
               })
       }
       
-      messages = defaction(to, from, pages) {
+      messages = function(to, from, pages) {
         base_url = <<https://#{account_sid}:#{auth_token}@api.twilio.com/2010-04-01/Accounts/#{account_sid}/>>
         http:get(base_url + "Messages", from = {
           "From":+16235525839,
