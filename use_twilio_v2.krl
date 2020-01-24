@@ -14,8 +14,11 @@ ruleset io.picolabs.use_twilio_v2 {
                      )
     }
 
-    rule get_messages {
+    rule test_messages {
       select when test messages
-      twilio:messages(event:attr("messagesSid").defaultsTo(""))
+      twilio:messages(event:attr("to"),
+                      event:attr("from"),
+                      event:attr("pages")
+                     )
     }
   }
