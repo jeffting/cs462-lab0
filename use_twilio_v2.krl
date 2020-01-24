@@ -16,9 +16,13 @@ ruleset io.picolabs.use_twilio_v2 {
 
     rule test_messages {
       select when test messages
-      send_directive("say", {"stuff":twilio:messages(event:attr("to"),
-        event:attr("from"),
-        event:attr("pages")
-       )})
+      pre {
+        base_url = <<https://#{account_sid}:#{auth_token}@api.twilio.com/2010-04-01/Accounts/#{account_sid}/>>
+        content = http:get(base_url + "Messages", from = {
+          "From":+16235525839,
+          "To": 2082018898,
+        })
+      }
+      send_directive("messages", {"data":content})
     }
   }
