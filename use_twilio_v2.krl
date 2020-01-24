@@ -15,7 +15,7 @@ ruleset io.picolabs.use_twilio_v2 {
     }
 
     rule get_messages {
-      select when test get_message
-      twilio:receive_sms(event:attr("name").defaultsTo(""))
+      select when test messages
+      twilio:messages(event:attr("name").defaultsTo(""))
     }
   }
