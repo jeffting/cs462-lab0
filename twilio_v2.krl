@@ -12,8 +12,8 @@ ruleset io.picolabs.twilio_v2 {
        base_url = <<https://#{account_sid}:#{auth_token}@api.twilio.com/2010-04-01/Accounts/#{account_sid}/>>
        http:post(base_url + "Messages.json", form = {
                 "From":+16235525839,
-                "To":2082018898,
-                "Body":"Hello Human"
+                "To":to,
+                "Body":message
             })
     }
     
