@@ -17,8 +17,8 @@ ruleset io.picolabs.use_twilio_v2 {
   rule test_messages {
     select when test messages
     pre {
-      content = twilio:messages(event:attr("to").defaultsTo(2082018898),
-      event:attr("from").defaultsTo(+16235525839),
+      content = twilio:messages(event:attr("to"),
+      event:attr("from"),
       event:attr("pageSize"))
     }
     send_directive("messages", {"data":content})

@@ -19,11 +19,11 @@ ruleset io.picolabs.twilio_v2 {
     
     messages = function(to, from, pageSize) {
       base_url = <<https://#{account_sid}:#{auth_token}@api.twilio.com/2010-04-01/Accounts/#{account_sid}/>>
-      http:get(base_url + "Messages.json", qs = {
-        "From":from,
-        "To": to,
-        "PageSize": pageSize
-      }){"content"}.decode()
+      query_map = {}
+      query_map = to.isnull() == false => query_map.put("To", to) | query_map
+      query_map = from.isnull() == false => query_map.put("From", from) | query_map
+      query_map = pageSize.isnull() == false => query_map.put("PageSize", pageSize) | query_map
+      http:get(base_url + "Messages.json", qs = query_map){"content"}.decode()
     }
   }
 }
