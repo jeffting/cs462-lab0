@@ -42,7 +42,12 @@ ruleset wovyn_base {
       }
       send_directive(violation);
       fired {
-        raise wovyn event "threshold_violation" if temperature > temperature_threshold
+        raise wovyn event "threshold_violation" 
+        attributes {
+          "temperature": temperature,
+          "timestamp": timestamp
+        } if temperature > temperature_threshold
+        
       }
   }
   
