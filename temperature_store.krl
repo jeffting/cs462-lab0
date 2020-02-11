@@ -35,6 +35,7 @@ ruleset temperature_store {
 
     rule clear_tempertures {
         select when sensor reading_reset
+        send_directive("Clear Temperatures")
         always {
             ent:temperatures := empty_temps
             ent:violations := empty_temps
