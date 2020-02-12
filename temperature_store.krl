@@ -45,12 +45,12 @@ ruleset temperature_store {
         }
         send_directive("temperature_violation", {"temperature": temperature, "time": time} )
         always {
-            ent:violations := ent:violations.append({"temperature_violation": temperature, "time": time})
+            ent:violations := ent:violations.append({"temperature": temperature, "time": time})
         }
     }
 
     rule clear_tempertures {
-        select when sensor reading_reset
+        select when wovyn reading_reset
         send_directive("Clear Temperatures")
         always {
             ent:temperatures := empty_temps
