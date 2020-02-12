@@ -1,6 +1,7 @@
 ruleset temperature_store {
     meta {
-        shares __testing
+        shares __testing, temperatures_func, threshold_violations_func, inrange_temperatures_func
+        provides temperatures_func, threshold_violations_func, inrange_temperatures_func
       }
     global {
         __testing = { "queries": [ { "name": "__testing" } ],
@@ -8,7 +9,22 @@ ruleset temperature_store {
                                   "attrs": [ "temp", "baro" ] } ] 
                                 }
         empty_temps = []
+        temp_threshold = 75
+        
+        temperatures_func = function() {
+            ent:temperatures
+        }
+
+        threshold_violations_func = function() {
+            ent:violations
+        }
+
+        inrange_temperatures_func = function() {
+            new_temps = ent:temperatures.filter(function(a) {a < temp_threshold})
+            new_temps["no_violation"]
+        }
       }
+      
     rule collect_temperatures {
         select when wovyn new_temperature_reading
         pre {
@@ -29,7 +45,7 @@ ruleset temperature_store {
         }
         send_directive("temperature_violation", {"temperature": temperature, "time": time} )
         always {
-            ent:temperatures := ent:temperatures.append({"temperature_violation": temperature, "time": time})
+            ent:violations := ent:violations.append({"temperature_violation": temperature, "time": time})
         }
     }
 
