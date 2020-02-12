@@ -50,7 +50,8 @@ ruleset temperature_store {
     }
 
     rule clear_tempertures {
-        select when wovyn reading_reset
+        select when sensor reading_reset
+        pre {}
         send_directive("Clear Temperatures")
         always {
             ent:temperatures := empty_temps
