@@ -49,7 +49,7 @@ ruleset temperature_store {
         }
     }
 
-    rule clear_tempertures {
+    rule clear_temperatures {
         select when sensor reading_reset
         pre {}
         send_directive("Clear Temperatures")
