@@ -20,8 +20,8 @@ ruleset temperature_store {
         }
 
         inrange_temperatures_func = function() {
-            new_temps = ent:temperatures.filter(function(a) {a < temp_threshold})
-            new_temps["no_violation"]
+            new_temps = ent:temperatures.filter(function(a) {a["temperature"] < temp_threshold})
+            new_temps
         }
       }
       
