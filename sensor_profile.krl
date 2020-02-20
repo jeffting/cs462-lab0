@@ -6,7 +6,7 @@ ruleset sensor_profile {
         pre {
             location = event:attr("location") == "" => ent:location | event:attr("location")
             name = event:attr("name") == "" => ent:name | event:attr("name")
-            threshold = event:attr("threshold") == "" => ent:threshold | event:attr("threshold")
+            threshold = event:attr("threshold") => event:attr("threshold") | ent:threshold
         }
         send_directive("data", {"name": ent:name, "location": ent:location, "threshold": ent:threshold})
         always {
