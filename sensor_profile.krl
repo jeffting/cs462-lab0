@@ -10,7 +10,7 @@ ruleset sensor_profile {
             profile
         }
         get_threshold = function() {
-            ent:threshold
+            ent:threshold.defaultsTo(75)
         }
     }
     rule update_profile {

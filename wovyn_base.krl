@@ -2,6 +2,7 @@ ruleset wovyn_base {
   meta {
     use module io.picolabs.lesson_keys
     use module io.picolabs.twilio_v2 alias twilio
+    use module sensor_profile alias profile
       with account_sid = keys:twilio{"account_sid"}
            auth_token =  keys:twilio{"auth_token"}
     shares __testing
@@ -35,6 +36,7 @@ ruleset wovyn_base {
   rule find_high_temps {
       select when wovyn new_temperature_reading
       pre {
+        temperature_threshold = profile:get_threshold()
         temperature = event:attr("temperature")
         timeStamp = event:attr("timestamp")
         violation = temperature > temperature_threshold => "Violation!!" | "No Violation!!!"
