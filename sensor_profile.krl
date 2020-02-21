@@ -15,8 +15,8 @@ ruleset sensor_profile {
         pre {
             location = event:attr("location") => event:attr("location") | ent:location
             name = event:attr("name") => event:attr("name") | ent:name
-            number = event:attr("threshold") => event:attr("threshold") | ent:threshold
-            threshold = event:attr("number") => event:attr("bumber") | ent:number
+            threshold = event:attr("threshold") => event:attr("threshold") | ent:threshold
+            number = event:attr("number") => event:attr("number") | ent:number
             thresholdDidChange = event:attr("threshold") => true | false
         }
         send_directive("data", {"name": ent:name, "location": ent:location, "threshold": ent:threshold, "number": ent:number})
