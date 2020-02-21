@@ -1,5 +1,6 @@
 ruleset temperature_store {
     meta {
+        use module sensor_profile alias profile
         shares __testing, temperatures_func, threshold_violations_func, inrange_temperatures_func
         provides temperatures_func, threshold_violations_func, inrange_temperatures_func
       }
@@ -9,7 +10,6 @@ ruleset temperature_store {
                                   "attrs": [ "temp", "baro" ] } ] 
                                 }
         empty_temps = []
-        temp_threshold = 75
         
         temperatures_func = function() {
             ent:temperatures
@@ -20,7 +20,8 @@ ruleset temperature_store {
         }
 
         inrange_temperatures_func = function() {
-            new_temps = ent:temperatures.filter(function(a) {a["temperature"] < temp_threshold})
+            live_threshold = profile:get_threshold()
+            new_temps = ent:temperatures.filter(function(a) {a["temperature"] < live_threshold})
             new_temps
         }
       }

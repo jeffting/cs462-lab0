@@ -1,13 +1,16 @@
 ruleset sensor_profile {
     meta {
-        shares get_profile
-        provides get_profile
+        shares get_profile, get_threshold
+        provides get_profile, get_threshold
     }
 
     global {
         get_profile = function() {
             profile = {"name": ent:name, "location": ent:location, "threshold": ent:threshold, "number": ent:number}
             profile
+        }
+        get_threshold = function() {
+            ent:threshold
         }
     }
     rule update_profile {
