@@ -3,10 +3,7 @@ ruleset manage_sensors {
         shares __testing
     }
     global {
-        __testing = { "queries": [ { "name": "__testing" } ],
-                      "events": [ { "domain": "post", "type": "test",
-                                  "attrs": [ "temp", "baro" ] } ] 
-                                }
+        __testing = { "events":  [ { "domain": "sensor", "type": "new_sensor", "attrs": [ "sensor_id" ] } ] }
     }
 
     rule new_sensor {
@@ -19,8 +16,8 @@ ruleset manage_sensors {
         then
             send_directive("new sensor", { "sensor_id": sensor_id})
         notfired {
-            raise wrangler event "child_creation"
-                attributes { "sensor_id": nameFromID(sensor_id), "color": "#ffff00" }
+          raise wrangler event "child_creation"
+            attributes { "name": nameFromID(sensor_id), "color": "#ffff00" }
         }
     }
 
@@ -28,7 +25,7 @@ ruleset manage_sensors {
         select when wrangler child_initialized
         pre {
             the_section = {"id": event:attr("id"), "eci": event:attr("eci")}
-            sensor_id = event:attr("sensor_id")
+            sensor_id = event:attr("name")
         }
         if sensor_id.klog("found section_id")
         then
