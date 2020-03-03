@@ -10,18 +10,36 @@ ruleset manage_sensors {
     }
 
     rule new_sensor {
-        select when sensor:new_sensor
+        select when sensor new_sensor
         pre {
-            session_name = event:attr("session_name")
-            exists = ent:sessions >< session_name
-            eci = meta:eci
+            session_id = event:attr("session_id")
         }
-        if exists then
-            send_directive("new sensor", { "session_name": session_name, "eci": eci})
-        notfired {
-            ent:sensors := ent:sensors.union([section_id])
+        send_directive("new sensor", { "session_id": session_id, "eci": eci})
+        fired {
             raise wrangler event "child_creation"
-                attributes { "name": nameFromID(session_name), "color": "#ffff00" }
+                attributes { "session_id": nameFromID(session_id), "color": "#ffff00" }
         }
     }
+
+    rule store_new_section {
+        select when wrangler child_initialized
+        pre {
+            the_section = {"id": event:attr("id"), "eci": event:attr("eci")}
+            session_id = event:attr("session_id")
+        }
+        if session_id.klog("found section_id")
+        then
+            noop()
+        fired {
+            ent:sessions := ent:sessions.defaultsTo({});
+            ent:sessions{[session_id]} := the_section
+        }
+    }
+
+    rule collection_empty {
+        select when collection empty
+        always {
+          ent:sessions := {}
+        }
+      }
 }
