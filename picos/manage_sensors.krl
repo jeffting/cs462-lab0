@@ -3,7 +3,7 @@ ruleset manage_sensors {
         shares __testing
     }
     global {
-        __testing = { "events":  [ { "domain": "sensor", "type": "new_sensor", "attrs": [ "sensor_id" ] } ] }
+        __testing = { "events":  [ { "domain": "sensor", "type": "new_sensor", "attrs": [ "sensor_id" ] }, {"domain": "collection", "type": "empty", "attrs": []} ] }
     }
 
     rule new_sensor {
@@ -12,12 +12,11 @@ ruleset manage_sensors {
             sensor_id = event:attr("sensor_id")
             exists = ent:sensors >< sensor_id
         }
-        if exists
-        then
-            send_directive("new sensor", { "sensor_id": sensor_id})
+        if exists then
+            send_directive("sensor exists", { "sensor_id": sensor_id})
         notfired {
           raise wrangler event "child_creation"
-            attributes { "name": nameFromID(sensor_id), "color": "#ffff00" }
+            attributes { "name": sensor_id, "color": "#ffff00" }
         }
     }
 
@@ -38,6 +37,7 @@ ruleset manage_sensors {
 
     rule collection_empty {
         select when collection empty
+        send_directive("Empty")
         always {
           ent:sensors := {}
         }
