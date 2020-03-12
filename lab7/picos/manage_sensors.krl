@@ -1,12 +1,13 @@
 ruleset manage_sensors {
   meta {
       shares __testing, sensors
+      use module io.picolabs.subscription alias Subscriptions
   }
   global {
       __testing = { "events":  [ { "domain": "sensor", "type": "new_sensor", "attrs": [ "sensor_id" ] }, {"domain": "collection", "type": "empty", "attrs": []} ] }
-  
+
     sensors = function() {
-      ent:sensors
+      Subscriptions:established("Tx_role","sensor")
     }
   }
 
@@ -20,7 +21,7 @@ ruleset manage_sensors {
           send_directive("sensor exists", { "sensor_id": sensor_id})
       notfired {
         raise wrangler event "child_creation"
-          attributes { "name": sensor_id, "color": "#ffff00", "rids": ["temperature_store", "wovyn_base", "sensor_profile"] }
+          attributes { "name": sensor_id, "color": "#ffff00", "child_type": "sensor", "rids": ["temperature_store", "wovyn_base", "sensor_profile"] }
       }
   }
 
@@ -29,8 +30,9 @@ ruleset manage_sensors {
       pre {
           the_section = {"id": event:attr("id"), "eci": event:attr("eci")}
           sensor_id = event:attr("name")
+          child_type = event:attr("child_type")
       }
-      if sensor_id.klog("found section_id")
+      if sensor_id
       then
           event:send(
             { "eci": the_section{"eci"}, "eid": "update-profile",
@@ -46,23 +48,11 @@ ruleset manage_sensors {
               "channel_type": "subscription",
               "wellKnown_Tx" : the_section{"eci"}
             }
+          raise sensor event "notify_outside" attributes {
+            "name" : sensor_id,
+            "eci" : the_section{"eci"}
+          }
       }
-  }
-
-  rule sensor_created {
-    select when sensor created
-    pre {
-      eci = event:attr("eci")
-      sensor_id = event:attr("sensor_id")
-    }
-    event:send(
-      { "eci": eci, "eid": "subscription",
-        "domain": "wrangler", "type": "subscription",
-        "attrs": { "name": sensor_id,
-                   "Rx_role": "controller",
-                   "Tx_role": "thing",
-                   "channel_type": "subscription",
-                   "wellKnown_Tx": thing } } )
   }
   
   rule update_profile {
@@ -110,5 +100,22 @@ ruleset manage_sensors {
       always {
         ent:sensors := {}
       }
+    }
+
+    rule new_outside_sensor {
+      select when sensor subscribe_outside_sensor 
+      pre {
+        eci = event:attr("eci")
+        name = event:attr("name")
+        ip_addr = event:attr("ip")
+      }
+      event:send(
+        { "eci": eci, "eid": "subscription",
+          "domain": "wrangler", "type": "subscription",
+          "attrs": { "name": name,
+                     "Rx_role": "manager",
+                     "Tx_role": "sensor",
+                     "channel_type": "subscription",
+                     "wellKnown_Tx": eci } }, host="https://"+ip_addr+":8080" )
     }
 }
