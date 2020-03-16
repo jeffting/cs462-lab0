@@ -1,6 +1,6 @@
 ruleset manage_sensors {
   meta {
-      shares __testing, sensors
+      shares __testing, sensors, get_temps_func
       use module io.picolabs.subscription alias Subscriptions
   }
   global {
@@ -8,6 +8,15 @@ ruleset manage_sensors {
 
     sensors = function() {
       Subscriptions:established("Tx_role","sensor")
+    }
+    
+    get_temps_func = function() {
+      temps = Subscriptions:established("Tx_role", "sensor").map(function(obj) {
+        host = obj{"Tx_host"}.defaultsTo("http://localhost:8080")
+        // host = "http://localhost:8080/"
+        http:get(host + "/sky/cloud/" + obj{"Tx"} + "/temperature_store/temperatures"){"content"}.decode()
+      })
+      temps
     }
   }
 
@@ -48,10 +57,6 @@ ruleset manage_sensors {
               "channel_type": "subscription",
               "wellKnown_Tx" : the_section{"eci"}
             }
-          raise sensor event "notify_outside" attributes {
-            "name" : sensor_id,
-            "eci" : the_section{"eci"}
-          }
       }
   }
   
@@ -102,20 +107,49 @@ ruleset manage_sensors {
       }
     }
 
-    rule new_outside_sensor {
-      select when sensor subscribe_outside_sensor 
+   rule subscribe_to_outside_sensor {
+        select when sensor subscribe_outside_sensor
+        pre{
+            ip_addr = event:attr("ip")
+            name = event:attr("name")
+            eci = event:attr("eci")
+        }
+        always{
+            raise wrangler event "subscription" attributes
+                {   "name" : name,
+                    "Rx_role": "manager",
+                    "Tx_role": "sensor",
+                    "channel_type": "subscription",
+                    "wellKnown_Tx" : eci,
+                    "Tx_host": <<http://#{ip_addr}:8080>>
+                }
+        }
+    }
+    
+    rule get_outside_temps {
+      select when sensor get_outside_temps
+      foreach Subscriptions:established("Tx_role","sensor") setting (subscription)
       pre {
-        eci = event:attr("eci")
-        name = event:attr("name")
-        ip_addr = event:attr("ip")
+        thing_subs = subscription.klog("subs")
       }
-      event:send(
-        { "eci": eci, "eid": "subscription",
-          "domain": "wrangler", "type": "subscription",
-          "attrs": { "name": name,
-                     "Rx_role": "manager",
-                     "Tx_role": "sensor",
-                     "channel_type": "subscription",
-                     "wellKnown_Tx": eci } }, host="https://"+ip_addr+":8080" )
+      if subscription{"Tx_host"} != null
+      then
+        event:send(
+          { "eci": subscription{"Tx"}, "eid": "subscription",
+            "domain": "sensor", "type": "get_temps", "Tx_host": subscription{"Tx_host"} })
+    }
+    
+    rule get_inside_temps {
+      select when sensor get_inside_temps
+      foreach Subscriptions:established("Tx_role","sensor") setting (subscription)
+      pre {
+        thing_subs = subscription.klog("subs")
+      }
+      // send_directive("hello")
+      // if subscription{"Tx_host"} == null
+      // then
+        event:send(
+          { "eci": subscription{"Tx"}, "eid": "subscription",
+            "domain": "sensor", "type": "get_temps" })
     }
 }

@@ -13,6 +13,7 @@ ruleset wovyn_base {
                               "attrs": [ "temp", "baro" ] } ] }
     temperature_threshold = 75
     phoneNum = 2082018898
+    default_host = "localhost:8080"
   }
  
   rule wovyn_base {
@@ -54,6 +55,21 @@ ruleset wovyn_base {
   
   rule threshold_notification {
     select when wovyn threshold_violation
+    foreach Subscriptions:established("Tx_role", "sensor") setting (subscription)
+    pre {
+      temp = event:attr("temperature")
+      time = event:attr("timestamp")
+    }
     twilio:send_sms(phoneNum, "nothing", "Temperature violation")
+    always{
+      raise sensor_manager event "threshold_violation" attributes
+          {   "timestamp" : timestamp,
+              "temperature": temp,
+              "threshold": temperature_threshold,
+              "channel_type": "subscription",
+              "wellKnown_Tx" : subscription{"Rx"},
+              "Tx_host": subscrition{"Tx_host"}.defaultsTo(default_host)
+          }
+  }
   }
 }
