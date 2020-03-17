@@ -1,8 +1,8 @@
 ruleset temperature_store {
     meta {
         use module sensor_profile alias profile
-        shares __testing, temperatures_func, threshold_violations_func, inrange_temperatures_func
-        provides temperatures_func, threshold_violations_func, inrange_temperatures_func
+        shares __testing, temperatures, threshold_violations_func, inrange_temperatures_func
+        provides temperatures, threshold_violations_func, inrange_temperatures_func
       }
     global {
         __testing = { "queries": [ { "name": "__testing" } ],
@@ -11,8 +11,8 @@ ruleset temperature_store {
                                 }
         empty_temps = []
         
-        temperatures_func = function() {
-            ent:temperatures
+        temperatures = function() {
+            ent:temperatures.defaultsTo([])
         }
 
         threshold_violations_func = function() {

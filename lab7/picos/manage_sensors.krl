@@ -52,7 +52,7 @@ ruleset manage_sensors {
           ent:sensors{[sensor_id]} := the_section
           raise wrangler event "subscription" attributes
             { "name" : sensor_id,
-              "Rx_role": "manager",
+              "Rx_role": "sensor_manager",
               "Tx_role": "sensor",
               "channel_type": "subscription",
               "wellKnown_Tx" : the_section{"eci"}
@@ -110,18 +110,18 @@ ruleset manage_sensors {
    rule subscribe_to_outside_sensor {
         select when sensor subscribe_outside_sensor
         pre{
-            ip_addr = event:attr("ip")
+            ip_addr = event:attr("ip").klog("ip_addr")
             name = event:attr("name")
-            eci = event:attr("eci")
+            eci = event:attr("eci").klog("eci")
         }
         always{
             raise wrangler event "subscription" attributes
                 {   "name" : name,
-                    "Rx_role": "manager",
+                    "Rx_role": "sensor_manager",
                     "Tx_role": "sensor",
                     "channel_type": "subscription",
                     "wellKnown_Tx" : eci,
-                    "Tx_host": <<http://#{ip_addr}:8080>>
+                    "Tx_host": <<http://#{ip_addr}>>
                 }
         }
     }
